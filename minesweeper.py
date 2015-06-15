@@ -146,15 +146,34 @@ def left_click(x, y, pole, a, b, size, canvas):
 
 
 
+def first(x, y, pole, a, b, size, canvas, m):
+    s = y*a + x
+    if s in m:
+        k = (random.randrange(a * b))
+        while k in m:
+            k = (random.randrange(a * b))
+        m.append(k)
+        m.remove(s)
+        pole = sh_znach(m, a, b)
+        pole[y][x][1] = 1
+        paint(pole)
+
+    else:
+        left_click(x, y, pole, a, b, size, canvas)
+    return(pole)  
 
 
 
-
-def LClick(event, size, pole, a, b, canvas):
+def LClick(event, size, pole, a, b, canvas, m):
+    global k
     x, y = event.x, event.y
     y = y//size
     x = x//size
-    left_click(x, y, pole, a, b, size, canvas)
+    if k == 0:
+        k = 1
+        first(x, y, pole, a, b, size, canvas, m)
+    else:
+        left_click(x, y, pole, a, b, size, canvas)
     return(pole)
 
 
@@ -188,14 +207,7 @@ def paint(pole, a, b, size, canvas):
     for x in range(a):
         for y in range(b):
             if pole[y][x][2] == 1:
-                canvas.create_text((x+0.5)*size,(y+0.5)*size, text="ф", fill = "green")
-
-
-
-
-
-
-
+                canvas.create_text((x+0.5)*size,(y+0.5)*size, text="f", fill = "red")
 
 
 
@@ -203,17 +215,32 @@ def paint(pole, a, b, size, canvas):
 
 
 dan = pol_param()
-m = sozd_bomb(dan[1], dan[2], dan[3])
+size = dan[0]
+
 a = dan[1]
 b = dan[2]
-size = dan[0]
+
 canvas = tkinter.Canvas(width=a*size, height=b*size)
+for i in range(a):
+    canvas.create_line(i*size, 0, i*size, b*size, fill = "green")
+for i in range(b):
+    canvas.create_line(0, i*size, a*size, i*size, fill = "green")
+
+
+
+k = 0
+
+
+
+m = sozd_bomb(dan[1], dan[2], dan[3])
+
+
 canvas.pack()
-pole = sh_znach(m, dan[1], dan[2])
-print(pole)
+pole = sh_znach(m, a, b)
+
 
 pole = mas(pole, a, b)
 paint(pole, a, b, size, canvas)
 canvas.bind("<Button-3>", lambda evt: RClick(evt, size, pole, a, b, canvas))
-canvas.bind("<Button-1>", lambda evt: LClick(evt, size, pole, a, b, canvas))
+canvas.bind("<Button-1>", lambda evt: LClick(evt, size, pole, a, b, canvas, m))
 canvas.mainloop()
