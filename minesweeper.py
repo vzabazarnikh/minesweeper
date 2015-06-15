@@ -11,7 +11,7 @@ import random
 
 
 def pol_param():
-    size = 50	
+    size = 50   
     a = 8
     b = 8
     n = 10
@@ -50,48 +50,98 @@ def prov(m, f):
 
 
 
-def sh_kl(m, f, a):
+def sh_kl(m, f, a, b):
     if f in m:
-        return(9)
-    c = prov (m, (f + 1)) + prov (m, (f - 1)) + prov (m, (f + a)) + prov (m, (f - a)) + prov (m, (f + a + 1)) + prov (m, (f + 1 - a)) + prov (m, (f - 1 - a)) + prov (m, (f - 1 + a))
-    return c
-
-
-
+        return("*")
+    c = [prov (m, (f + 1)), prov (m, (f - 1)), prov (m, (f + a)), prov (m, (f - a)), prov (m, (f + a + 1)), prov (m, (f + 1 - a)), prov (m, (f - 1 - a)), prov (m, (f - 1 + a))]
+    if (f+1) // a == 0:
+        c[3] = 0
+        c[5] = 0
+        c[6] = 0
+    if (f+1) > a*(b-1):
+        c[2] = 0
+        c[4] = 0
+        c[7] = 0
+    if (f+1) % a == 0:
+        c[0] = 0
+        c[4] = 0
+        c[5] = 0
+    if (f+1) % a == 1:
+        c[1] = 0
+        c[6] = 0
+        c[7] = 0
+    l = sum([i for i in c]) 
+    return l
 
 def sh_znach(m, a, b):
     pole = []
     for i in range(b):
-        pole.append([0; 0; 0] * a)
+        pole.append([0] * a)
     for x in range(a):
         for y in range(b):
-            pole[x][y][0] = sh_kl(m, perevod(a, x, y), a)
+            pole[x][y] = sh_kl(m, perevod(a, x, y), a, b)
+    return pole
+
+
+
+def mas(m, a, b):
+    pole = []
+    for i in range(b):
+        s = []
+        for t in range(a):
+            s.append([0, 0, 0])
+        pole.append(s)
+    for x in range(a):
+        for y in range(b):
+            f = perevod(a, x, y)
+            pole[x][y][0] = m[x][y]
     pole.append(0)
+    print (pole)
     return pole
 
 
 
 
 
-def right_click(a, b, pole, k):
+def right_click(x, y, pole, a, b, size, canvas):
     if pole[-1] == 0:
-        if pole[b][a][1] == 0:
-            if pole[b][a][2] == 0:
-                pole[b][a][2] = 1
+        if pole[y][x][1] == 0:
+            if pole[y][x][2] == 0:
+                pole[y][x][2] = 1
             else:
-                pole[b][a][2] = 0
-        paint(pole)
+                pole[y][x][2] = 0
+        paint(pole, a, b, size, canvas)
     return (pole)
 
 
 
-def left_click(a, b, pole, k):
+def left_click(x, y, pole, a, b, size, canvas):
     if pole[-1] == 0:
-        if pole[b][a][2] == 0:
-            pole[b][a][1] = 0
-        paint(pole)
-        if pole[b][a][0] == 9:
+        if pole[y][x][2] == 0:
+            pole[y][x][1] = 1
+        paint(pole, a, b, size, canvas)
+        if pole[y][x][0] == "*":
             pole[-1] = 1
+            print("lose")
+            for x in range(a):
+                for y in range(b):
+                    pole[x][y][1] = 1
+                    pole[x][y][2] = 0
+            paint(pole, a, b, size, canvas) 
+        else:
+            g = 0
+            k = 0
+            for x in range(a):
+                for y in range(b):
+                    if pole[x][y][0] != "*":
+                        g = g + 1
+            for x in range(a):
+                for y in range(b):
+                    if pole[x][y][1] == 1:
+                        k = k + 1   
+            if k == g:
+                print("win")
+                pole[-1] = 1
     return (pole)
 
 
@@ -100,21 +150,45 @@ def left_click(a, b, pole, k):
 
 
 
-def LClick(x, y, size, pole, k):
+def LClick(event, size, pole, a, b, canvas):
     x, y = event.x, event.y
-    b = y//size
-    a = x//size
-    left_click(a, b, pole)
+    y = y//size
+    x = x//size
+    left_click(x, y, pole, a, b, size, canvas)
+    return(pole)
 
-    
 
-    
 
-def RClick(event, size, pole, k):
+
+
+def RClick(event, size, pole, a, b, canvas):
     x, y = event.x, event.y
-    b = y//size
-    a = x//size
-    right_click(a, b, pole)
+    y = y//size
+    x = x//size
+    right_click(x, y, pole, a, b, size, canvas)
+    return(pole)
+
+
+
+
+
+
+
+
+def paint(pole, a, b, size, canvas):
+    canvas.delete("all")
+    for i in range(a):
+        canvas.create_line(i*size, 0, i*size, b*size, fill = "green")
+    for i in range(b):
+        canvas.create_line(0, i*size, a*size, i*size, fill = "green")
+    for x in range(a):
+        for y in range(b):
+            if pole[y][x][1] == 1:
+                canvas.create_text((x+0.5)*size,(y+0.5)*size, text=str(pole[y][x][0]), fill = "green")
+    for x in range(a):
+        for y in range(b):
+            if pole[y][x][2] == 1:
+                canvas.create_text((x+0.5)*size,(y+0.5)*size, text="ф", fill = "green")
 
 
 
@@ -127,35 +201,19 @@ def RClick(event, size, pole, k):
 
 
 
-size = dan[0]
+
 dan = pol_param()
 m = sozd_bomb(dan[1], dan[2], dan[3])
-
-canvas = tkinter.Canvas()
+a = dan[1]
+b = dan[2]
+size = dan[0]
+canvas = tkinter.Canvas(width=a*size, height=b*size)
 canvas.pack()
 pole = sh_znach(m, dan[1], dan[2])
-canvas.bind("<Button-2>", lambda evt: RClick(evt, size, pole))
-canvas.bind("<Button-1>", lambda evt: LClick(evt, size, pole))
-canvas.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-print(m)
-
 print(pole)
+
+pole = mas(pole, a, b)
+paint(pole, a, b, size, canvas)
+canvas.bind("<Button-3>", lambda evt: RClick(evt, size, pole, a, b, canvas))
+canvas.bind("<Button-1>", lambda evt: LClick(evt, size, pole, a, b, canvas))
+canvas.mainloop()
