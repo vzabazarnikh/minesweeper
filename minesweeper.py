@@ -96,7 +96,6 @@ def mas(m, a, b):
             f = perevod(a, x, y)
             pole[x][y][0] = m[x][y]
     pole.append(0)
-    print (pole)
     return pole
 
 
@@ -119,29 +118,28 @@ def left_click(x, y, pole, a, b, size, canvas):
     if pole[-1] == 0:
         if pole[y][x][2] == 0:
             pole[y][x][1] = 1
-        paint(pole, a, b, size, canvas)
-        if pole[y][x][0] == "*":
-            pole[-1] = 1
-            print("lose")
-            for x in range(a):
-                for y in range(b):
-                    pole[x][y][1] = 1
-                    pole[x][y][2] = 0
-            paint(pole, a, b, size, canvas) 
-        else:
-            g = 0
-            k = 0
-            for x in range(a):
-                for y in range(b):
-                    if pole[x][y][0] != "*":
-                        g = g + 1
-            for x in range(a):
-                for y in range(b):
-                    if pole[x][y][1] == 1:
-                        k = k + 1   
-            if k == g:
-                print("win")
+            if pole[y][x][0] == "*":
                 pole[-1] = 1
+                print("lose")
+                for x in range(a):
+                    for y in range(b):
+                        pole[x][y][1] = 1
+                        pole[x][y][2] = 0
+            else:
+                g = 0
+                k = 0
+                for x in range(a):
+                    for y in range(b):
+                        if pole[x][y][0] != "*":
+                            g = g + 1
+                for x in range(a):
+                    for y in range(b):
+                        if pole[x][y][1] == 1:
+                            k = k + 1   
+                if k == g:
+                    print("win")
+                    pole[-1] = 1
+        paint(pole, a, b, size, canvas) 
     return (pole)
 
 
@@ -155,9 +153,9 @@ def first(x, y, pole, a, b, size, canvas, m):
         m.append(k)
         m.remove(s)
         pole = sh_znach(m, a, b)
+        pole = mas(pole, a, b)
         pole[y][x][1] = 1
-        paint(pole)
-
+        paint(pole, a, b, size, canvas)
     else:
         left_click(x, y, pole, a, b, size, canvas)
     return(pole)  
